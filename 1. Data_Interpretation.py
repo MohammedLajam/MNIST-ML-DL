@@ -1,7 +1,6 @@
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
 import pandas as pd
-# test
 
 # 1. displaying the shape of the dataset:
 (train_x, train_y), (test_x, test_y) = mnist.load_data()
