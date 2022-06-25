@@ -5,6 +5,7 @@ from keras.layers import Conv2D, Dropout, Activation, Flatten, Dense, MaxPooling
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
+from sklearn.metrics import classification_report
 
 # 1. Data Visualization:
 (train_x, train_y), (test_x, test_y) = mnist.load_data()
@@ -94,19 +95,20 @@ print(predicted_values)
 plt.show()
 
 # 5. Model Evaluation:
-# 5.1. Test Accuracy:
-print("Model Evaluation")
-test_loss, test_acc = model.evaluate(test_x_r, test_y)
-print(f'Test loss on 10000 test samples is {test_loss}')
-print(f'Validation accuracy on 10000 test samples is {test_acc}')
-
-# 5.2. Confusion Matrix
+# 5.1. Accuracy, Precision, Recall and F1 score:
 # converting all the predicted values in the test dataset into one value in array
 complete_predicted_values = []
 for i in range(10000):
     complete_predicted_values.append(np.argmax(prediction[i]))
 print(complete_predicted_values)  # printing the complete predicted value in a list
 
+print("Model Evaluation")
+test_loss, test_acc = model.evaluate(test_x_r, test_y)
+print(f'Test loss on 10000 test samples is {test_loss}')
+print(f'Validation accuracy on 10000 test samples is {test_acc}')
+print(classification_report(test_y, complete_predicted_values))
+
+# 5.2. Confusion Matrix
 cm = tf.math.confusion_matrix(labels=test_y, predictions=complete_predicted_values)
 print(cm)  # printing the confusion matrix in the terminal
 
@@ -116,3 +118,8 @@ sn.heatmap(cm, annot=True, fmt='d')
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.show()
+
+# 5.3. TPR (Sensitivity) & FPR (Specificity): with many thresholds
+
+# 5.4. ROC/AUC to evaluate different models:
+
