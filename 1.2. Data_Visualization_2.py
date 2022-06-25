@@ -13,11 +13,6 @@ from tensorflow import convert_to_tensor, linalg, transpose
 import numpy as np
 # For plotting with matplotlib
 import matplotlib.pyplot as plt
-# For plotting with seaborn
-import seaborn as sns
-# For plotting with bokeh
-from bokeh.plotting import figure, show
-from bokeh.models import Legend, LegendItem
 # For pandas dataframe
 import pandas as pd
 
