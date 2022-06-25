@@ -1,6 +1,8 @@
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
-import pandas as pd
+from tensorflow import dtypes, tensordot
+from tensorflow import convert_to_tensor, linalg, transpose
+import numpy as np
 
 # 1. displaying the shape of the dataset:
 (train_x, train_y), (test_x, test_y) = mnist.load_data()
@@ -24,3 +26,49 @@ for i in range(9):
     plt.imshow(train_x[i])
 plt.show()
 print(train_y[:9])
+
+# 3. Data Visualization:
+total_classes = 10
+
+# Shape of training data
+total_examples, img_length, img_width = train_x.shape
+# Print the statistics
+print('Training data has ', total_examples, 'images')
+print('Each image is of size ', img_length, 'x', img_width)
+
+# Figures in matplotlib: plotting bunch of images:
+img_per_row = 8
+fig, ax = plt.subplots(nrows=2, ncols=img_per_row, figsize=(18, 4), subplot_kw=dict(xticks=[], yticks=[]))
+for row in [0, 1]:
+    for col in range(img_per_row):
+        ax[row, col].imshow(train_x[row*img_per_row + col].astype('int'))
+plt.show()
+
+# Scatter Plots in matplotlib and Seaborn (PCA):
+# Convert the dataset into a 2D array of shape 18623 x 784
+x = convert_to_tensor(np.reshape(train_x, (train_x.shape[0], -1)),
+                      dtype=dtypes.float32)
+# Eigen-decomposition from a 784 x 784 matrix
+eigenvalues, eigenvectors = linalg.eigh(tensordot(transpose(x), x, axes=1))
+# Print the three largest eigenvalues
+print('3 largest eigenvalues: ', eigenvalues[-3:])
+# Project the data to eigenvectors
+x_pca = tensordot(x, eigenvectors, axes=1)
+
+# Plotting the Scatter Plot:
+fig, ax = plt.subplots(figsize=(12, 8))
+scatter = ax.scatter(x_pca[:, -1], x_pca[:, -2], c=train_y, s=5)
+legend_plt = ax.legend(*scatter.legend_elements(),
+                       loc="lower left", title="Digits")
+ax.add_artist(legend_plt)
+plt.title('First Two Dimensions of Projected Data After Applying PCA')
+plt.show()
+
+# 3D Scatter Plot:
+fig = plt.figure(figsize=(12, 8))
+ax = plt.axes(projection='3d')
+plt_3d = ax.scatter3D(x_pca[:, -1], x_pca[:, -2], x_pca[:, -3], c=train_y, s=1)
+legend_plt = ax.legend(*scatter.legend_elements(),
+                       loc="lower left", title="Digits")
+ax.add_artist(legend_plt)
+plt.show()

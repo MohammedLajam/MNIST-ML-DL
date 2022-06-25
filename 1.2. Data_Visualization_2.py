@@ -1,8 +1,6 @@
-# https://machinelearningmastery.com/data-visualization-in-python-with-matplotlib-seaborn-and-bokeh/
-# Data Visualization in Python with matplotlib, Seaborn, and Bokeh
+# Data Visualization
 # Plotting all the classes:
 
-# Importing from tensorflow and keras
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Reshape
