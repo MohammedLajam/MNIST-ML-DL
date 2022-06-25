@@ -45,12 +45,7 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Conv2D(48, (3, 3), input_shape=train_x_r.shape[1:]))
 model.add(Activation("relu"))  # Activation function to make non-linear
 model.add(MaxPooling2D(pool_size=(2, 2)))
-'''
-# Third Convolutional Layer:
-model.add(Conv2D(64, (3, 3), input_shape=train_x_r.shape[1:]))
-model.add(Activation("relu"))  # Activation function to make non-linear
-model.add(MaxPooling2D(pool_size=(2, 2)))
-'''
+
 # Fully connected layer (Flatten)
 model.add(Flatten())
 model.add(Dense(500))
