@@ -26,6 +26,7 @@ test_x = tf.keras.utils.normalize(test_x, axis=1)
 plt.imshow(train_x[0], cmap=plt.cm.binary)
 print(train_x[0])
 
+
 # 2.2. Resizing the images to make it suitable for convolutional operation:
 IMG_SIZE = 28
 train_x_r = np.array(train_x).reshape(-1, IMG_SIZE, IMG_SIZE, 1)
