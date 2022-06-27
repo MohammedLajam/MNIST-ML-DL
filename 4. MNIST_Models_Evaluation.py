@@ -1,74 +1,127 @@
-import keras
+# Models Evaluation of ANN and CNN for MNIST Dataset (Hand-Written-Digits):
+
 import tensorflow as tf
 from tensorflow import keras
 from keras.datasets import mnist
-from keras.layers import Conv2D, Dropout, Activation, Flatten, Dense, MaxPooling2D
+from keras.layers import Conv2D, Activation, Flatten, Dense, MaxPooling2D
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
 from sklearn.metrics import classification_report
 import pandas as pd
-from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
+from sklearn.metrics import precision_recall_fscore_support
 
 # loading the training and test sets:
-(train_x, train_y), (test_x, test_y) = mnist.load_data()
+(train_x_ann, train_y_ann), (test_x_ann, test_y_ann) = mnist.load_data()
+(train_x_cnn, train_y_cnn), (test_x_cnn, test_y_cnn) = mnist.load_data()
 
 # Model 1: ANN:
-# 1. Data preprocessing:
-# 1.1. Data Normalization:
-train_x = train_x/255
-test_x = test_x/255
+# 1. Data Normalization:
+# 1.1. ANN:
+train_x_ann = train_x_ann/255
+test_x_ann = test_x_ann/255
+train_x_ann = train_x_ann.reshape(len(train_x_ann), 28*28)
+test_x_ann = test_x_ann.reshape(len(test_x_ann), 28*28)
 
-# 1.2. Data flattening:
-train_x_flattened = train_x.reshape(len(train_x), 28*28)
-test_x_flattened = test_x.reshape(len(test_x), 28*28)
+# 1.2. CNN:
+train_x_cnn = tf.keras.utils.normalize(train_x_cnn, axis=1)
+test_x_cnn = tf.keras.utils.normalize(test_x_cnn, axis=1)
+IMG_SIZE = 28
+train_x_cnn = np.array(train_x_cnn).reshape(-1, IMG_SIZE, IMG_SIZE, 1)
+test_x_cnn = np.array(test_x_cnn).reshape(-1, IMG_SIZE, IMG_SIZE, 1)
 
-# 2. ANN Model:
-# 2.1. Building the Model:
-model1 = keras.Sequential([
+# 2. Building a Model:
+# 2.1. ANN:
+model_ann = keras.Sequential([
     keras.layers.Dense(100, input_shape=(784,), activation='relu'),  # one hidden layer with 100 neurons
     keras.layers.Dense(10, activation='sigmoid')  # output layer
 ])
+model_ann.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+history_ann = model_ann.fit(train_x_ann, train_y_ann, epochs=102, validation_split=0.3)
 
-model1.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-history = model1.fit(train_x_flattened, train_y, epochs=10, validation_split=0.3)
+# 2.2. CNN:
+model_cnn = keras.models.Sequential()
+model_cnn.add(Conv2D(32, (3, 3), input_shape=train_x_cnn.shape[1:]))
+model_cnn.add(Activation("relu"))  # Activation function to make non-linear
+model_cnn.add(MaxPooling2D(pool_size=(2, 2)))
+model_cnn.add(Conv2D(48, (3, 3), input_shape=train_x_cnn.shape[1:]))
+model_cnn.add(Activation("relu"))  # Activation function to make non-linear
+model_cnn.add(MaxPooling2D(pool_size=(2, 2)))
+model_cnn.add(Flatten())
+model_cnn.add(Dense(500))
+model_cnn.add(Activation("relu"))
+model_cnn.add(Dense(10))
+model_cnn.add(Activation("Softmax"))
 
-# 3. Model Prediction:
-prediction = model1.predict(test_x_flattened)
+model_cnn.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics='accuracy')
+history_cnn = model_cnn.fit(train_x_cnn, train_y_cnn, epochs=5, validation_split=0.3)
 
-# 4. Model Evaluation:
-# 4.1. Confusion Matrix:
-# converting all the predicted values in the test dataset into one value in array
-complete_predicted_values = []
+# 3. Models Predictions:
+# ANN:
+predictions_ann = model_ann.predict(test_x_ann)
+complete_predicted_values_ann = []
 for i in range(10000):
-    complete_predicted_values.append(np.argmax(prediction[i]))
-print(complete_predicted_values)  # printing the complete predicted value in a list
+    complete_predicted_values_ann.append(np.argmax(predictions_ann[i]))
 
-cm = tf.math.confusion_matrix(labels=test_y, predictions=complete_predicted_values)
-print(cm)  # printing the confusion matrix in the terminal
+# CNN:
+predictions_cnn = model_cnn.predict(test_x_cnn)
+complete_predicted_values_cnn = []
+for i in range(10000):
+    complete_predicted_values_cnn.append(np.argmax(predictions_cnn[i]))
 
-# plotting the confusion matrix using seaborn and matplotlib
+# 4. Models Evaluations:
+print("Models Evaluation")
+# 4.1. Confusion Matrix:
+cm_ann = tf.math.confusion_matrix(labels=test_y_ann, predictions=complete_predicted_values_ann)
+cm_cnn = tf.math.confusion_matrix(labels=test_y_cnn, predictions=complete_predicted_values_cnn)
+
+# plotting the confusion matrix using seaborn and matplotlib (ANN)
 plt.figure(figsize=(10, 7))
-sn.heatmap(cm, annot=True, fmt='d')
+sn.heatmap(cm_ann, annot=True, fmt='d')
+plt.title('Confusion Matrix (ANN)')
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.show()
 
-# 4.2. Accuracy, Precision, Recall and F1 score:
-# For all the classes accumulated:
-test_loss, test_acc = model1.evaluate(test_x_flattened, test_y)
-print(f'Model ACCURACY is {test_acc}')
-print(f'Model LOSS is {test_loss}')
-print(classification_report(test_y, complete_predicted_values))
+# plotting the confusion matrix using seaborn and matplotlib (CNN)
+plt.figure(figsize=(10, 7))
+sn.heatmap(cm_cnn, annot=True, fmt='d')
+plt.title('Confusion Matrix (CNN)')
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+# 4.2. Accuracy, Precision, Recall and F1 score
+test_loss_ann, test_acc_ann = model_ann.evaluate(test_x_ann, test_y_ann)
+print(f'ANN ACCURACY is {test_acc_ann}')
+print(f'ANN LOSS is {test_loss_ann}')
+test_loss_cnn, test_acc_cnn = model_cnn.evaluate(test_x_cnn, test_y_cnn)
+print(f'CNN Accuracy is {test_acc_cnn}')
+print(f'CNN LOSS is {test_loss_cnn}')
+print("Classification report (ANN):")
+print(classification_report(test_y_ann, complete_predicted_values_ann))
+print("Classification report (CNN):")
+print(classification_report(test_y_cnn, complete_predicted_values_cnn))
 
 # 4.3. TPR (Sensitivity) & FPR (Specificity): with many thresholds
-result = []
+# ANN:
+ss_ann = []
 for i in range(10):
-    prec, recall, _, _ = precision_recall_fscore_support(np.array(test_y) == i,
-                                                        np.array(complete_predicted_values) == i,
+    prec_ann, recall_ann, _, _ = precision_recall_fscore_support(np.array(test_y_ann) == i,
+                                                        np.array(complete_predicted_values_ann) == i,
                                                         pos_label=True, average=None)
-    result.append([i, recall[0], recall[1]])
+    ss_ann.append([i, recall_ann[0], recall_ann[1]])
 
-print(pd.DataFrame(result, columns=['class', 'sensitivity', 'specificity']))
+print('Sensitivity and Specificity (ANN)')
+print(pd.DataFrame(ss_ann, columns=['class', 'sensitivity', 'specificity']))
 
-# 4.4. ROC/AUC to evaluate different models:
+# CNN:
+ss_cnn = []
+for i in range(10):
+    prec_cnn, recall_cnn, _, _ = precision_recall_fscore_support(np.array(test_y_cnn) == i,
+                                                        np.array(complete_predicted_values_cnn) == i,
+                                                        pos_label=True, average=None)
+    ss_cnn.append([i, recall_cnn[0], recall_cnn[1]])
+
+print('Sensitivity and Specificity (CNN)')
+print(pd.DataFrame(ss_cnn, columns=['class', 'sensitivity', 'specificity']))
