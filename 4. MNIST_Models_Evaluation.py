@@ -15,7 +15,6 @@ from sklearn.metrics import precision_recall_fscore_support
 (train_x_ann, train_y_ann), (test_x_ann, test_y_ann) = mnist.load_data()
 (train_x_cnn, train_y_cnn), (test_x_cnn, test_y_cnn) = mnist.load_data()
 
-# Model 1: ANN:
 # 1. Data Normalization:
 # 1.1. ANN:
 train_x_ann = train_x_ann/255
@@ -57,13 +56,13 @@ model_cnn.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metr
 history_cnn = model_cnn.fit(train_x_cnn, train_y_cnn, epochs=5, validation_split=0.3)
 
 # 3. Models Predictions:
-# ANN:
+# 3.1. ANN:
 predictions_ann = model_ann.predict(test_x_ann)
 complete_predicted_values_ann = []
 for i in range(10000):
     complete_predicted_values_ann.append(np.argmax(predictions_ann[i]))
 
-# CNN:
+# 3.2. CNN:
 predictions_cnn = model_cnn.predict(test_x_cnn)
 complete_predicted_values_cnn = []
 for i in range(10000):
