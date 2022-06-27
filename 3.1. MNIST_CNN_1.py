@@ -3,9 +3,10 @@ import tensorflow as tf
 from keras.datasets import mnist
 from keras.layers import Conv2D, Dropout, Activation, Flatten, Dense, MaxPooling2D
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import seaborn as sn
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, precision_recall_fscore_support
 
 # 1. Data Visualization:
 (train_x, train_y), (test_x, test_y) = mnist.load_data()
@@ -116,6 +117,11 @@ plt.ylabel("Actual")
 plt.show()
 
 # 5.3. TPR (Sensitivity) & FPR (Specificity): with many thresholds
+result = []
+for i in range(10):
+    prec_cnn, recall_cnn, _, _ = precision_recall_fscore_support(np.array(test_y) == i,
+                                                        np.array(complete_predicted_values) == i,
+                                                        pos_label=True, average=None)
+    result.append([i, recall_cnn[0], recall_cnn[1]])
 
-# 5.4. ROC/AUC to evaluate different models:
-
+print(pd.DataFrame(result, columns=['class', 'sensitivity', 'specificity']))
