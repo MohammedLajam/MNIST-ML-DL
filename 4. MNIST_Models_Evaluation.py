@@ -36,7 +36,7 @@ model_ann = keras.Sequential([
     keras.layers.Dense(10, activation='sigmoid')  # output layer
 ])
 model_ann.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-history_ann = model_ann.fit(train_x_ann, train_y_ann, epochs=102, validation_split=0.3)
+history_ann = model_ann.fit(train_x_ann, train_y_ann, epochs=10, validation_split=0.3)
 
 # 2.2. CNN:
 model_cnn = keras.models.Sequential()
