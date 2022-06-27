@@ -1,11 +1,11 @@
+import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
-from sklearn.metrics import classification_report
-from sklearn.metrics import roc_curve
+from sklearn.metrics import classification_report, precision_recall_fscore_support
 
 (train_x, train_y), (test_x, test_y) = mnist.load_data()
 print(train_x.shape)
@@ -91,5 +91,12 @@ print(f'Model ACCURACY is {test_acc}')
 print(f'Model LOSS is {test_loss}')
 print(classification_report(test_y, complete_predicted_values))
 
-# 4.3. TPR (Sensitivity) & FPR (Specificity): with many thresholds
-# 4.4. ROC/AUC to evaluate different models:
+# 4.3. TPR (Sensitivity) & FPR (Specificity): with many thresholds:
+result = []
+for i in range(10):
+    prec_ann, recall_ann, _, _ = precision_recall_fscore_support(np.array(test_y) == i,
+                                                        np.array(complete_predicted_values) == i,
+                                                        pos_label=True, average=None)
+    result.append([i, recall_ann[0], recall_ann[1]])
+
+print(pd.DataFrame(result, columns=['class', 'sensitivity', 'specificity']))
